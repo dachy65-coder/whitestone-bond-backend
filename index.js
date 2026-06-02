@@ -23,7 +23,9 @@ app.post('/send-bond-application', upload.single('pdf'), async (req, res) => {
     if (!pdfBuffer) return res.status(400).json({ error: 'No PDF received' });
 
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.GMAIL_USER,
         pass: process.env.GMAIL_PASS,
