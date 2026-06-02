@@ -5,6 +5,7 @@ const { Resend } = require('resend');
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 app.use(cors({
   origin: '*',
@@ -21,8 +22,6 @@ app.post('/send-bond-application', upload.single('pdf'), async (req, res) => {
     const meta = JSON.parse(req.body.meta || '{}');
 
     if (!pdfBuffer) return res.status(400).json({ error: 'No PDF received' });
-
-    const resend = new Resend(process.env.RESEND_API_KEY);
 
     const bizName = meta.bizName || 'Unknown Pharmacy';
     const bondType = meta.bondType || 'Pharmacy Bond';
@@ -71,3 +70,4 @@ app.post('/send-bond-application', upload.single('pdf'), async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Bond mailer running on port ${PORT}`));
+
