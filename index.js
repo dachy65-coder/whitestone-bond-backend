@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
-const nodemailer = require('nodemailer');
 const multer = require('multer');
+const { Resend } = require('resend');
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -22,15 +22,7 @@ app.post('/send-bond-application', upload.single('pdf'), async (req, res) => {
 
     if (!pdfBuffer) return res.status(400).json({ error: 'No PDF received' });
 
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASS,
-      },
-    });
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     const bizName = meta.bizName || 'Unknown Pharmacy';
     const bondType = meta.bondType || 'Pharmacy Bond';
@@ -38,8 +30,8 @@ app.post('/send-bond-application', upload.single('pdf'), async (req, res) => {
     const refNum   = meta.refNum   || 'N/A';
     const submittedAt = new Date().toLocaleString('en-US', { timeZone: 'America/New_York' });
 
-    await transporter.sendMail({
-      from: `"Whitestone Bond Portal" <${process.env.GMAIL_USER}>`,
+    await resend.emails.send({
+      from: 'Whitestone Bond Portal <onboarding@resend.dev>',
       to: 'dachy65@gmail.com',
       subject: `New Bond Application – ${bizName} [${refNum}]`,
       html: `
@@ -65,8 +57,7 @@ app.post('/send-bond-application', upload.single('pdf'), async (req, res) => {
       attachments: [
         {
           filename: `bond-application-${refNum}.pdf`,
-          content: pdfBuffer,
-          contentType: 'application/pdf',
+          content: pdfBuffer.toString('base64'),
         },
       ],
     });
