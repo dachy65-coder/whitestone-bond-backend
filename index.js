@@ -11,7 +11,6 @@ app.use(cors({
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Accept']
 }));
-app.options('*', cors());
 app.use(express.json({ limit: '10mb' }));
 
 app.get('/', (req, res) => res.send('Whitestone Bond Mailer OK'));
